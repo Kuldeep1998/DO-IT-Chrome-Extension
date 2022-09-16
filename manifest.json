@@ -1,0 +1,10 @@
+{
+    "name": "Do-It",
+    "version": "0.01",
+    "description": "A ToDo list pop out",
+    "action":{
+        "default_title":"Epic mode",
+        "default_popup": "popout.html"
+    },
+    "manifest_version": 3
+}
