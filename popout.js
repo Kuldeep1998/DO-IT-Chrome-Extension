@@ -1,93 +1,116 @@
 
 
-//add-task : create todo button onclick open ".new-item"
-//new-task : if button pressed it save & hide "new-item"
-document.querySelector('.add-task').addEventListener('click', function(){
-   document.querySelector('.new-task').style.display='block';
-});
-var itemsArr=[];
-document.querySelector('.new-task button').addEventListener('click', function(){
-    var itemName = document.querySelector('.new-task input').value;
-    if (itemName != '') {
+// To render input and save button on screen
+    document.querySelector('.add-task').addEventListener('click', function(){
+            document.querySelector('.new-task').style.display='block';
+    });
+
+   
+    let obj = {
+         task : "",
+         status : 0
+    }
+
+    // Adding functionality to new task button
+
+    document.querySelector('.new-task button').addEventListener('click', function()
+        {
+            var itemName = document.querySelector('.new-task input').value;
+            if (itemName != '') {
+                    var itemsStorage = localStorage.getItem('to-do-tasks');
+                    var itemsArr=JSON.parse(itemsStorage);
+                    obj.task = itemName;
+                    obj.status = 0;
+                    itemsArr.push(obj);
+                    saveItems(itemsArr);
+                    fetchItems();
+                    document.querySelector('.new-task input').value = '';
+                    document.querySelector('.new-task').style.display='none';
+            }
+        }
+    );
+
+   
+    // Fetching items from local storage
+    function fetchItems()
+    {
+            const itemsList = document.querySelector('ul.to-do-tasks');
+            itemsList.innerHTML = '';
+            var newItemHTML = '';
+
+            var itemsStorage = localStorage.getItem('to-do-tasks');
+            var itemsArr=JSON.parse(itemsStorage);
+
+            for (let i = 0; i < itemsArr.length; i++)
+            {
+                var status = '';
+                if(itemsArr[i].status == '1')
+                {
+                    status = 'class="done"';
+                    
+                }
+                
+                newItemHTML += `<li data-itemindex="${i}" ${status}>
+                <span class="task">${itemsArr[i].task}</span>
+                <div><span class="itemComplete">✔️</span><span class="itemDelete">❌</span></div>
+                </li>`
+            }
+
+            itemsList.innerHTML= newItemHTML; // Adding new tasks
+
+            var itemListUL =  document.querySelectorAll('ul li');
+
+            // Adding event listner to all "Right" and "Wrong" marks in the list
+            for (let i = 0; i < itemListUL.length; i++)
+            {      
+                itemListUL[i].querySelector('.itemComplete').addEventListener('click', function()
+                    {
+                        var index = this.parentNode.parentNode.dataset.itemindex;
+                        itemComplete(index);
+                    }
+                );  
+
+                itemListUL[i].querySelector('.itemDelete').addEventListener('click', function()
+                    {
+                        var index = this.parentNode.parentNode.dataset.itemindex;
+                        itemDelete(index);
+                    }
+                );
+            }
+        
+    }
+
+    // Adding funtiolity to "right" mark
+    function itemComplete(index)
+    {
         var itemsStorage = localStorage.getItem('to-do-tasks');
         var itemsArr=JSON.parse(itemsStorage);
-      //  var itemsArr=[];
-        itemsArr.push({"task" : itemName, "status": 0});
+
+        itemsArr[index].status = 1;
         saveItems(itemsArr);
-        fetchItems();
-        document.querySelector('.new-task input').value = '';
-        document.querySelector('.new-task').style.display='none';
+        
+        document.querySelector('ul.to-do-tasks li[data-itemindex="'+index+'"]').className='done';
+        
     }
- });
 
-// const items =[{"item": "Start chrome extension project", "status": "0"},
-// {"item": "Start chrome extension project", "status": "1"}];
+    // Adding functionlity to "cross" mark
+    function itemDelete(index)
+    {
+        var itemsStorage = localStorage.getItem('to-do-tasks');
+        var itemsArr=JSON.parse(itemsStorage);
 
-// const itemsStr = JSON.stringify(items);
+        itemsArr.splice(index, 1); // Removing the task from array
+        saveItems(itemsArr);
 
-// console.log(items);
-// console.log(itemsStr);
+        document.querySelector('ul.to-do-tasks li[data-itemindex="'+index+'"]').remove(); // Removing the task from list
 
-function fetchItems(){
-    const itemsList = document.querySelector('ul.to-do-tasks');
-    itemsList.innerHTML = '';
-    var newItemHTML = '';
-    try{
-    var itemsStorage = localStorage.getItem('to-do-tasks');
-    var itemsArr=JSON.parse(itemsStorage);
-    for (let i = 0; i < itemsArr.length; i++) {
-        var status = '';
-        if(itemsArr.status == 1){
-            status = 'class="done"';
-        }
-        newItemHTML += `<li data-itemindex="${i}" ${status}>
-        <span class="task">${itemsArr[i].task}</span>
-        <div><span class="itemComplete">✔️</span><span class="itemDelete">❌</span></div>
-        </li>`
-     }
-      itemsList.innerHTML= newItemHTML;
-      var itemListUL =  document.querySelectorAll('ul li');
-      for (let i = 0; i < itemListUL.length; i++){      
-           itemListUL[i].querySelector('.itemComplete').addEventListener('click', function(){
-               var index = this.parentNode.parentNode.dataset.itemindex;
-             //  console.log(index);
-            itemComplete(index);
-           })  ;  
-           itemListUL[i].querySelector('.itemDelete').addEventListener('click', function(){
-            var index = this.parentNode.parentNode.dataset.itemindex;
-          //  console.log(index);
-            itemDelete(index);
-           })  ; 
-      }
     }
-    catch(e){
-        //.
-        //sldkjfls....
+
+    // Saving items to local storage
+    function saveItems(obj){
+        var string = JSON.stringify(obj);
+        localStorage.setItem('to-do-tasks', string);
     }
-}
 
-function itemComplete(index){
-    var itemsStorage = localStorage.getItem('to-do-tasks');
-    var itemsArr=JSON.parse(itemsStorage);
-    itemsArr[index].status = 1;
-    saveItems(itemsArr);
     
-    document.querySelector('ul.to-do-tasks li[data-itemindex="'+index+'"]').className='done';
-    
-}
-function itemDelete(index){
-    var itemsStorage = localStorage.getItem('to-do-tasks');
-    var itemsArr=JSON.parse(itemsStorage);
-    itemsArr.splice(index, 1);
-    
-  
-    saveItems(itemsArr);
-    
-    document.querySelector('ul.to-do-tasks li[data-itemindex="'+index+'"]').remove();
-
-}
-function saveItems(obj){
-    var string = JSON.stringify(obj);
-    localStorage.setItem('to-do-tasks', string);
-}
- fetchItems();
+    fetchItems();
